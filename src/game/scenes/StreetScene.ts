@@ -48,6 +48,9 @@ export class StreetScene extends Phaser.Scene {
 
     EventBus.emit(EV.STATE_UPDATE, this.state);
     EventBus.emit(EV.SCENE_CHANGE, "street");
+    EventBus.removeAllListeners("action:go_farm");
+    EventBus.removeAllListeners("action:sell");
+    EventBus.removeAllListeners("open_sell_panel");
     EventBus.on("action:go_farm", () => {
       saveState(this.state);
       EventBus.emit(EV.SCENE_CHANGE, "farm");

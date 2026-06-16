@@ -40,7 +40,10 @@ export class FarmScene extends Phaser.Scene {
     EventBus.emit(EV.GAME_READY, this);
     EventBus.emit(EV.STATE_UPDATE, this.state);
 
-    // Listen for UI actions
+    // Clear any stale listeners before registering (guards against scene restart duplication)
+    const actionEvents = ["action:plant","action:water","action:nutrient","action:harvest","action:buy_item","action:buy_item_token","action:sell","action:use_burner","action:reset","action:go_street","weed_tokens_updated"];
+    actionEvents.forEach(ev => EventBus.removeAllListeners(ev));
+
     EventBus.on("action:plant", this.handlePlant, this);
     EventBus.on("action:water", this.handleWater, this);
     EventBus.on("action:nutrient", this.handleNutrient, this);
