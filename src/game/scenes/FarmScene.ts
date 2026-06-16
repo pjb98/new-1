@@ -2239,9 +2239,9 @@ export class FarmScene extends Phaser.Scene {
     // Enter grow room: player walks onto house door tile
     if (!this._enteringRoom) {
       const doorPx = HOME.houseCx * TILE + TILE / 2;
-      const doorPy = (HOME.houseBaseRow + 1) * TILE;
+      const doorPy = (HOME.houseBaseRow + 1) * TILE + TILE / 2;
       const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, doorPx, doorPy);
-      if (dist < TILE * 1.2) {
+      if (dist < TILE * 3) {
         this._enteringRoom = true;
         this.player.setVelocity(0, 0);
         this.cameras.main.fadeOut(300, 0, 0, 0, (_: Phaser.Cameras.Scene2D.Camera, p: number) => {
