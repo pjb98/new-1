@@ -25,7 +25,8 @@ export class ThreeApp {
   init(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    // Use window dimensions — canvas may have 0 clientWidth at init time
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -88,10 +89,7 @@ export class ThreeApp {
   }
 
   private onResize() {
-    const canvas = this.renderer.domElement;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    this.renderer.setSize(w, h, false);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.farmView?.onResize(this.renderer);
     this.streetView?.onResize(this.renderer);
   }

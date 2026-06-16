@@ -10,9 +10,10 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameReady, setGameReady] = useState(false);
   const { address, weedBalance, solBalance, connecting, connected, hasEnoughTokens, connect, disconnect } = useWallet();
+  const devMode = new URLSearchParams(window.location.search).has("dev");
 
   useEffect(() => {
-    if (!connected || !hasEnoughTokens) return;
+    if (!devMode && (!connected || !hasEnoughTokens)) return;
     if (appRef.current) return;
     if (!canvasRef.current) return;
 
@@ -35,7 +36,7 @@ export default function App() {
   }, [weedBalance, gameReady]);
 
   // ---- Connect screen ----
-  if (!connected) {
+  if (!devMode && !connected) {
     return (
       <div style={{ minHeight: "100vh", background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", color: "#fff" }}>
         <div style={{ textAlign: "center", maxWidth: 480, padding: 40 }}>
@@ -62,7 +63,7 @@ export default function App() {
   }
 
   // ---- Not enough tokens screen ----
-  if (connected && !hasEnoughTokens) {
+  if (!devMode && connected && !hasEnoughTokens) {
     return (
       <div style={{ minHeight: "100vh", background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", color: "#fff" }}>
         <div style={{ textAlign: "center", maxWidth: 500, padding: 40 }}>
@@ -105,7 +106,7 @@ export default function App() {
   // ---- Game ----
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#0d0d0d", overflow: "hidden", position: "relative" }}>
-      <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
+      <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, display: "block" }} />
       {gameReady && <GameUI walletAddress={address} weedTokenBalance={weedBalance} />}
     </div>
   );

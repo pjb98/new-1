@@ -272,7 +272,7 @@ export class FarmView {
     renderer.render(this.scene, this.camera);
   }
 
-  dispose(renderer: THREE.WebGLRenderer) {
-    renderer.domElement.replaceWith(renderer.domElement.cloneNode() as HTMLCanvasElement);
+  dispose() {
+    // scene is just dropped; renderer stays alive
   }
 }

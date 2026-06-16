@@ -31,37 +31,29 @@ export default function GameUI({ walletAddress, weedTokenBalance }: { walletAddr
   }, []);
 
   useEffect(() => {
-    EventBus.on(EV.STATE_UPDATE, (s: GameState) => {
-      setState({ ...s });
-    });
-    EventBus.on(EV.NOTIFICATION, ({ msg, type }: { msg: string; type: "success" | "error" }) => {
-      addNotif(msg, type);
-    });
-    EventBus.on(EV.POT_CLICKED, (data: { potIndex: number; pot: PotState }) => {
-      setSelectedPot(data);
-      setPanel("pot");
-    });
-    EventBus.on(EV.SCENE_CHANGE, (s: "farm" | "street") => setScene(s));
-    EventBus.on("nearby_customer", (id: string | null) => setNearbyCustomer(id));
-    EventBus.on("open_sell_panel", (id: string) => { setSellCustomerId(id); setPanel("sell"); });
-    EventBus.on("weed_tokens_updated", (amount: number) => {
-      setState(prev => prev ? { ...prev, weedTokens: amount } : prev);
-    });
+    const onState = (s: GameState) => setState({ ...s });
+    const onNotif = ({ msg, type }: { msg: string; type: "success" | "error" }) => addNotif(msg, type);
+    const onPot = (data: { potIndex: number; pot: PotState }) => { setSelectedPot(data); setPanel("pot"); };
+    const onScene = (s: "farm" | "street") => setScene(s);
+    const onNearby = (id: string | null) => setNearbyCustomer(id);
+    const onSell = (id: string) => { setSellCustomerId(id); setPanel("sell"); };
+
+    EventBus.on(EV.STATE_UPDATE, onState);
+    EventBus.on(EV.NOTIFICATION, onNotif);
+    EventBus.on(EV.POT_CLICKED, onPot);
+    EventBus.on(EV.SCENE_CHANGE, onScene);
+    EventBus.on("nearby_customer", onNearby);
+    EventBus.on("open_sell_panel", onSell);
+
     return () => {
-      EventBus.removeAllListeners(EV.STATE_UPDATE);
-      EventBus.removeAllListeners(EV.NOTIFICATION);
-      EventBus.removeAllListeners(EV.POT_CLICKED);
-      EventBus.removeAllListeners("nearby_customer");
-      EventBus.removeAllListeners("open_sell_panel");
+      EventBus.off(EV.STATE_UPDATE, onState);
+      EventBus.off(EV.NOTIFICATION, onNotif);
+      EventBus.off(EV.POT_CLICKED, onPot);
+      EventBus.off(EV.SCENE_CHANGE, onScene);
+      EventBus.off("nearby_customer", onNearby);
+      EventBus.off("open_sell_panel", onSell);
     };
   }, [addNotif]);
-
-  // Sync weed token balance from wallet
-  useEffect(() => {
-    if (weedTokenBalance >= 0 && state) {
-      EventBus.emit("weed_tokens_updated", weedTokenBalance);
-    }
-  }, [weedTokenBalance, state]);
 
   if (!state) return null;
 
