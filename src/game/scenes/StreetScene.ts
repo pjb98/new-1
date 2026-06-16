@@ -61,13 +61,17 @@ export class StreetView {
 
     this.camera = new THREE.PerspectiveCamera(60, renderer.domElement.width / renderer.domElement.height, 0.1, 100);
 
-    // Lighting
-    const ambient = new THREE.AmbientLight(0x334466, 0.5);
+    // Lighting — night street but still clearly visible
+    const ambient = new THREE.AmbientLight(0x8899cc, 1.0);
     this.scene.add(ambient);
 
-    const moon = new THREE.DirectionalLight(0x8899cc, 0.6);
+    const moon = new THREE.DirectionalLight(0xaabbdd, 1.2);
     moon.position.set(5, 10, 5);
     this.scene.add(moon);
+
+    const fill = new THREE.DirectionalLight(0x6677aa, 0.6);
+    fill.position.set(-5, 5, -5);
+    this.scene.add(fill);
 
     // Street lamps
     for (let i = -STREET_LENGTH / 2 + 4; i < STREET_LENGTH / 2; i += 6) {
@@ -77,13 +81,13 @@ export class StreetView {
       const lampHead = box(0.4, 0.15, 0.4, 0x888888);
       lampHead.position.set(STREET_WIDTH / 2 - 0.5, 4.1, i);
       this.scene.add(lampHead);
-      const ptl = new THREE.PointLight(0xffee88, 1.2, 8);
+      const ptl = new THREE.PointLight(0xffee88, 2.5, 10);
       ptl.position.set(STREET_WIDTH / 2 - 0.5, 3.9, i);
       this.scene.add(ptl);
     }
 
     // Road
-    const road = new THREE.Mesh(new THREE.PlaneGeometry(STREET_WIDTH, STREET_LENGTH), mat(0x222233));
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(STREET_WIDTH, STREET_LENGTH), mat(0x3a3a4a));
     road.rotation.x = -Math.PI / 2;
     road.receiveShadow = true;
     this.scene.add(road);

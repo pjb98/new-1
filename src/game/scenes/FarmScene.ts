@@ -161,54 +161,59 @@ export class FarmView {
 
   init(renderer: THREE.WebGLRenderer, state: GameState) {
     this._renderer = renderer;
-    this.scene.background = new THREE.Color(0x0d1117);
-    this.scene.fog = new THREE.Fog(0x0d1117, 12, 22);
+    this.scene.background = new THREE.Color(0x1a1a2e);
+    this.scene.fog = new THREE.Fog(0x1a1a2e, 15, 25);
 
     this.camera = new THREE.PerspectiveCamera(55, renderer.domElement.width / renderer.domElement.height, 0.1, 100);
     this.camera.position.set(0, 6, 8);
     this.camera.lookAt(0, 0, 0);
 
-    // Lighting
-    const ambient = new THREE.AmbientLight(0x223344, 0.6);
+    // Lighting — bright enough to see everything clearly
+    const ambient = new THREE.AmbientLight(0xffffff, 1.2);
     this.scene.add(ambient);
 
-    const hemi = new THREE.HemisphereLight(0x334455, 0x221100, 0.4);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x8888ff, 0.8);
     this.scene.add(hemi);
 
-    // Grow light
-    this.grow_light = new THREE.SpotLight(0xff44aa, 3, 14, Math.PI / 4, 0.3, 1.5);
+    // Directional fill light
+    const fill = new THREE.DirectionalLight(0xffffff, 1.0);
+    fill.position.set(3, 8, 5);
+    this.scene.add(fill);
+
+    // Grow light (pink/purple tint for atmosphere, additive)
+    this.grow_light = new THREE.SpotLight(0xff88ff, 2, 14, Math.PI / 3, 0.4, 1.2);
     this.grow_light.position.set(0, 6, 0);
-    this.grow_light.castShadow = true;
     this.scene.add(this.grow_light);
     this.scene.add(this.grow_light.target);
 
     // Floor
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 12), mat(COLORS.floor));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 12), mat(0x2a2a3e));
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     this.scene.add(floor);
 
-    // Walls
-    const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(14, 5), mat(COLORS.wall));
-    wallBack.position.set(0, 2.5, -6);
+    // Walls — lighter so they're visible
+    const wallMat = mat(0x2d3561);
+    const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), wallMat);
+    wallBack.position.set(0, 3, -6);
     this.scene.add(wallBack);
 
-    const wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), mat(COLORS.wall));
-    wallLeft.position.set(-7, 2.5, 0);
+    const wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat.clone());
+    wallLeft.position.set(-7, 3, 0);
     wallLeft.rotation.y = Math.PI / 2;
     this.scene.add(wallLeft);
 
-    const wallRight = wallLeft.clone();
-    wallRight.position.set(7, 2.5, 0);
+    const wallRight = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat.clone());
+    wallRight.position.set(7, 3, 0);
     wallRight.rotation.y = -Math.PI / 2;
     this.scene.add(wallRight);
 
-    // Ceiling light bars
+    // Ceiling light bars — bright white glow
     for (let i = -2; i <= 2; i++) {
-      const bar = box(0.2, 0.08, 3.5, 0xffffff, 0xffffff, 2);
-      bar.position.set(i * 1.5, 4.9, -1.5);
+      const bar = box(0.3, 0.1, 4, 0xffffff, 0xffffff, 3);
+      bar.position.set(i * 1.5, 4.95, -1.5);
       this.scene.add(bar);
-      const ptl = new THREE.PointLight(0xffa0e0, 0.6, 4);
+      const ptl = new THREE.PointLight(0xffe8ff, 1.5, 6);
       ptl.position.set(i * 1.5, 4.5, -1.5);
       this.scene.add(ptl);
     }
