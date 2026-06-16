@@ -2250,6 +2250,7 @@ export class FarmScene extends Phaser.Scene {
             upgrades: { ...this.upgrades },
             coins: this.coins,
             seeds: { ...this.seeds },
+            selectedSeed: this.selectedSeed,
           });
         });
         this.cameras.main.fadeOut(300, 0, 0, 0);

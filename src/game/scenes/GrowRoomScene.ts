@@ -86,8 +86,8 @@ export class GrowRoomScene extends Phaser.Scene {
   private waterBars: (Phaser.GameObjects.Rectangle | null)[] = [];
   private waterBarBgs: (Phaser.GameObjects.Rectangle | null)[] = [];
 
-  // Upgrades (read from FarmScene via registry)
   private upgrades = { growth: 0, lights: 0, pots: 0, trim: 0, fortune: 0, sprinkler: 0, market: 0 };
+  private selectedSeed: string | null = null;
 
 
   // Pot pixel positions (world coords)
@@ -123,8 +123,9 @@ export class GrowRoomScene extends Phaser.Scene {
     };
   }
 
-  create(data: { upgrades?: Record<string, number>; coins?: number; seeds?: Record<string, number> }) {
+  create(data: { upgrades?: Record<string, number>; coins?: number; seeds?: Record<string, number>; selectedSeed?: string }) {
     if (data.upgrades) this.upgrades = data.upgrades as typeof this.upgrades;
+    if (data.selectedSeed) this.selectedSeed = data.selectedSeed;
     
     this.exiting = false;
     
@@ -377,9 +378,12 @@ export class GrowRoomScene extends Phaser.Scene {
     const toolSelected = this.registry.get('selected') as string ?? 'hoe';
 
     if (!pot) {
-      // Empty pot — plant with selected seed
-      const seedId = this.registry.get('selectedSeed') as string;
-      if (!seedId) { this.showFloater('Select a strain first!', x, y, '#ff8888'); return; }
+      // Empty pot — plant with selected seed (fall back to first available)
+      const available = Object.entries(this.state.seeds).find(([, cnt]) => cnt > 0);
+      const seedId = this.selectedSeed && (this.state.seeds[this.selectedSeed] ?? 0) > 0
+        ? this.selectedSeed
+        : available?.[0] ?? null;
+      if (!seedId) { this.showFloater('No seeds! Buy from Strain Shop.', x, y, '#ff8888'); return; }
       const seedKey = seedId;
       const seedCount = this.state.seeds[seedKey] ?? 0;
       if (seedCount <= 0) { this.showFloater('No seeds!', x, y, '#ff8888'); sfx.play('error'); return; }
