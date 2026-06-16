@@ -1,42 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
-import Phaser from "phaser";
-import { GAME_W, GAME_H, WEED_TOKEN_REQUIRED } from "./game/constants";
-import { BootScene } from "./game/scenes/BootScene";
-import { FarmScene } from "./game/scenes/FarmScene";
-import { StreetScene } from "./game/scenes/StreetScene";
+import { WEED_TOKEN_REQUIRED } from "./game/constants";
 import { EventBus, EV } from "./game/EventBus";
+import { ThreeApp } from "./game/ThreeApp";
 import GameUI from "./ui/GameUI";
 import { useWallet } from "./chain/WalletProvider";
 
 export default function App() {
-  const gameRef = useRef<Phaser.Game | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const appRef = useRef<ThreeApp | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameReady, setGameReady] = useState(false);
   const { address, weedBalance, solBalance, connecting, connected, hasEnoughTokens, connect, disconnect } = useWallet();
 
   useEffect(() => {
     if (!connected || !hasEnoughTokens) return;
-    if (gameRef.current) return;
+    if (appRef.current) return;
+    if (!canvasRef.current) return;
 
-    const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
-      width: GAME_W,
-      height: GAME_H,
-      parent: containerRef.current!,
-      backgroundColor: "#0d0d0d",
-      scene: [BootScene, FarmScene, StreetScene],
-      scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-      },
-    };
-
-    gameRef.current = new Phaser.Game(config);
+    const app = new ThreeApp();
+    app.init(canvasRef.current);
+    appRef.current = app;
     EventBus.on(EV.GAME_READY, () => setGameReady(true));
 
     return () => {
-      gameRef.current?.destroy(true);
-      gameRef.current = null;
+      appRef.current?.destroy();
+      appRef.current = null;
     };
   }, [connected, hasEnoughTokens]);
 
@@ -118,7 +105,7 @@ export default function App() {
   // ---- Game ----
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#0d0d0d", overflow: "hidden", position: "relative" }}>
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
       {gameReady && <GameUI walletAddress={address} weedTokenBalance={weedBalance} />}
     </div>
   );

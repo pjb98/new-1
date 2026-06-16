@@ -1,6 +1,6 @@
-import Phaser from "phaser";
+import EventEmitter from "eventemitter3";
 
-export const EventBus = new Phaser.Events.EventEmitter();
+export const EventBus = new EventEmitter();
 
 // Events from game → UI
 export const EV = {
