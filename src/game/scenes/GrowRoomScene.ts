@@ -284,7 +284,7 @@ export class GrowRoomScene extends Phaser.Scene {
     const W = ROOM_COLS * TILE;
     const H = ROOM_ROWS * TILE;
     const doorX = Math.floor(ROOM_COLS / 2) * TILE + TILE;
-    const playerY = (ROOM_ROWS - 2) * TILE;
+    const playerY = (ROOM_ROWS - 4) * TILE;
     this.player = this.physics.add.sprite(doorX, playerY, 'pchar', 0).setScale(2).setDepth(playerY + 18);
     this.player.setCollideWorldBounds(true);
     this.physics.world.setBounds(TILE, TILE, W - 2 * TILE, H - 2 * TILE);
