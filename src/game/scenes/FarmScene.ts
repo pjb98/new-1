@@ -52,8 +52,10 @@ export class FarmScene extends Phaser.Scene {
     EventBus.on("action:reset", () => { localStorage.removeItem("weed_sim_save_v1"); location.reload(); });
     EventBus.on("action:go_street", () => {
       saveState(this.state);
+      EventBus.emit(EV.SCENE_CHANGE, "street");
       this.scene.start("StreetScene", { state: this.state });
     });
+    EventBus.emit(EV.SCENE_CHANGE, "farm");
     EventBus.on("weed_tokens_updated", (amount: number) => {
       this.state.weedTokens = amount;
       EventBus.emit(EV.STATE_UPDATE, this.state);
@@ -70,20 +72,42 @@ export class FarmScene extends Phaser.Scene {
   private redrawRoom() {
     const hasNeon = this.state.cosmetics.includes("neon_room");
     const hasMatrix = this.state.cosmetics.includes("matrix_room");
-    const floorColor = hasNeon ? 0x1a0033 : hasMatrix ? 0x001a00 : COLORS.floor;
-    const wallColor = hasNeon ? 0x4a0066 : hasMatrix ? 0x003300 : COLORS.wall;
 
     this.roomGfx.clear();
-    // Floor
-    this.roomGfx.fillStyle(floorColor);
-    this.roomGfx.fillRect(0, 0, GAME_W, GAME_H);
-    // Back wall
-    this.roomGfx.fillStyle(wallColor);
-    this.roomGfx.fillRect(0, 0, GAME_W, 80);
-    // Side walls
-    this.roomGfx.fillStyle(wallColor, 0.5);
-    this.roomGfx.fillRect(0, 0, 40, GAME_H);
-    this.roomGfx.fillRect(GAME_W - 40, 0, 40, GAME_H);
+    // Tiled floor
+    const TILE = 32;
+    const wallTint = hasNeon ? 0x9c27b0 : hasMatrix ? 0x00e676 : 0xaaaaaa;
+    const floorTint = hasNeon ? 0xcc88ff : hasMatrix ? 0x88ffaa : 0xffffff;
+
+    // Back wall tiles
+    for (let tx = 0; tx < Math.ceil(GAME_W / TILE); tx++) {
+      for (let ty = 0; ty < 3; ty++) {
+        this.add.image(tx * TILE + TILE / 2, ty * TILE + TILE / 2, "tile_wall").setTint(wallTint).setDepth(-2);
+      }
+    }
+    // Floor tiles
+    for (let tx = 0; tx < Math.ceil(GAME_W / TILE); tx++) {
+      for (let ty = 3; ty < Math.ceil(GAME_H / TILE); ty++) {
+        this.add.image(tx * TILE + TILE / 2, ty * TILE + TILE / 2, "tile_floor").setTint(floorTint).setDepth(-2);
+      }
+    }
+    // Side wall columns
+    for (let ty = 0; ty < Math.ceil(GAME_H / TILE); ty++) {
+      this.add.image(TILE / 2, ty * TILE + TILE / 2, "tile_wall").setTint(wallTint).setDepth(-1);
+      this.add.image(GAME_W - TILE / 2, ty * TILE + TILE / 2, "tile_wall").setTint(wallTint).setDepth(-1);
+    }
+
+    // Table tiles under pots
+    const rows = Math.ceil(this.state.pots.length / POT_COLS);
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < POT_COLS; col++) {
+        const tx = ROOM_X + col * POT_W;
+        const ty = ROOM_Y + row * POT_H - 10;
+        for (let dx = 0; dx < Math.ceil(POT_W / TILE); dx++) {
+          this.add.image(tx + dx * TILE + TILE / 2, ty + TILE / 2, "tile_table").setDepth(-1);
+        }
+      }
+    }
 
     // Grow lights
     this.lightGfx.clear();
@@ -91,20 +115,18 @@ export class FarmScene extends Phaser.Scene {
     const hasPro = this.state.ownedItems.includes("pro_led");
     const hasLED = this.state.ownedItems.includes("basic_led");
     const lightColor = hasHPS ? 0xffa500 : hasPro ? 0xffffff : hasNeon ? 0xcc00ff : 0x90ee90;
-    const lightAlpha = hasHPS ? 0.3 : 0.18;
+    const lightAlpha = hasHPS ? 0.25 : 0.15;
 
     if (hasLED || hasPro || hasHPS) {
       for (let col = 0; col < POT_COLS; col++) {
         const cx = ROOM_X + col * POT_W + POT_W / 2;
-        // Light fixture
-        this.lightGfx.fillStyle(0x333333);
-        this.lightGfx.fillRect(cx - 35, 20, 70, 12);
+        this.lightGfx.fillStyle(0x222222);
+        this.lightGfx.fillRoundedRect(cx - 36, 18, 72, 14, 4);
         this.lightGfx.fillStyle(lightColor);
-        this.lightGfx.fillRect(cx - 30, 24, 60, 6);
-        // Glow cone
+        this.lightGfx.fillRoundedRect(cx - 30, 21, 60, 7, 3);
         this.lightGfx.fillStyle(lightColor, lightAlpha);
-        this.lightGfx.fillTriangle(cx - 30, 30, cx + 30, 30, cx + 50, 110);
-        this.lightGfx.fillTriangle(cx - 30, 30, cx + 30, 30, cx - 50, 110);
+        this.lightGfx.fillTriangle(cx - 30, 32, cx + 30, 32, cx + 55, 120);
+        this.lightGfx.fillTriangle(cx - 30, 32, cx + 30, 32, cx - 55, 120);
       }
     }
 
@@ -119,13 +141,6 @@ export class FarmScene extends Phaser.Scene {
         }).setAlpha(0.12);
         this.matrixParticles.push(t);
       }
-    }
-
-    // Table surfaces
-    const rows = Math.ceil(this.state.pots.length / POT_COLS);
-    for (let row = 0; row < rows; row++) {
-      this.roomGfx.fillStyle(0x3e2723, 0.8);
-      this.roomGfx.fillRect(ROOM_X - 10, ROOM_Y + row * POT_H - 5, POT_COLS * POT_W + 20, 10);
     }
   }
 
@@ -147,21 +162,9 @@ export class FarmScene extends Phaser.Scene {
 
       const container = this.add.container(x, y);
 
-      // Pot base
-      const potGfx = this.add.graphics();
-      const potColor = hasGolden ? 0xffd700 : 0x5d4037;
-      const rimColor = hasGolden ? 0xffb300 : 0x4e342e;
-      potGfx.fillStyle(potColor);
-      // trapezoid shape
-      potGfx.fillPoints([
-        { x: -30, y: 25 }, { x: 30, y: 25 },
-        { x: 25, y: -10 }, { x: -25, y: -10 }
-      ], true);
-      potGfx.fillStyle(rimColor);
-      potGfx.fillRect(-32, -14, 64, 8);
-      potGfx.fillStyle(0x3e2723);
-      potGfx.fillEllipse(0, -10, 56, 18);
-      container.add(potGfx);
+      // Pot sprite (top-down pixel art)
+      const potSprite = this.add.image(0, 8, hasGolden ? "pot_top_gold" : "pot_top").setScale(1.5);
+      container.add(potSprite);
 
       // Plant sprite
       let plantSprite: Phaser.GameObjects.Image | null = null;
@@ -216,27 +219,18 @@ export class FarmScene extends Phaser.Scene {
         container.add(stageTxt);
       }
 
-      // Click interaction
+      // Hover highlight
+      const highlight = this.add.graphics();
+      container.add(highlight);
+
       const hitArea = this.add.rectangle(0, 0, POT_W - 10, POT_H - 10, 0xffffff, 0).setInteractive({ cursor: "pointer" });
-      hitArea.on("pointerover", () => { potGfx.lineStyle(2, 0x00ff88); potGfx.strokeRect(-32, -14, 64, 40); });
-      hitArea.on("pointerout", () => { potGfx.clear(); this.redrawPotGfx(potGfx, i); });
-      hitArea.on("pointerdown", () => { EventBus.emit(EV.POT_CLICKED, { potIndex: i, pot }); });
+      hitArea.on("pointerover", () => { highlight.lineStyle(3, 0x00ff88, 1); highlight.strokeRect(-POT_W / 2 + 5, -POT_H / 2 + 5, POT_W - 10, POT_H - 10); });
+      hitArea.on("pointerout", () => highlight.clear());
+      hitArea.on("pointerdown", () => { EventBus.emit(EV.POT_CLICKED, { potIndex: i, pot: this.state.pots[i] }); });
       container.add(hitArea);
 
       this.potContainers.push(container);
     });
-  }
-
-  private redrawPotGfx(g: Phaser.GameObjects.Graphics, i: number) {
-    const hasGolden = this.state.cosmetics.includes("golden_pots");
-    const potColor = hasGolden ? 0xffd700 : 0x5d4037;
-    const rimColor = hasGolden ? 0xffb300 : 0x4e342e;
-    g.fillStyle(potColor);
-    g.fillPoints([{ x: -30, y: 25 }, { x: 30, y: 25 }, { x: 25, y: -10 }, { x: -25, y: -10 }], true);
-    g.fillStyle(rimColor);
-    g.fillRect(-32, -14, 64, 8);
-    g.fillStyle(0x3e2723);
-    g.fillEllipse(0, -10, 56, 18);
   }
 
   private drawPotBars(i: number) {
@@ -366,24 +360,16 @@ export class FarmScene extends Phaser.Scene {
 
     const container2 = this.add.container(x, y);
     const hasGolden = this.state.cosmetics.includes("golden_pots");
-    const potColor = hasGolden ? 0xffd700 : 0x5d4037;
-    const rimColor = hasGolden ? 0xffb300 : 0x4e342e;
 
-    const potGfx = this.add.graphics();
-    potGfx.fillStyle(potColor);
-    potGfx.fillPoints([{ x: -30, y: 25 }, { x: 30, y: 25 }, { x: 25, y: -10 }, { x: -25, y: -10 }], true);
-    potGfx.fillStyle(rimColor);
-    potGfx.fillRect(-32, -14, 64, 8);
-    potGfx.fillStyle(0x3e2723);
-    potGfx.fillEllipse(0, -10, 56, 18);
-    container2.add(potGfx);
+    const potSprite = this.add.image(0, 8, hasGolden ? "pot_top_gold" : "pot_top").setScale(1.5);
+    container2.add(potSprite);
 
     if (pot.strainId && pot.stage !== "empty") {
       const texKey = pot.stage === "planted" ? "plant_planted" :
                      pot.stage === "seedling" ? "plant_seedling" :
                      pot.stage === "vegetative" ? "plant_vegetative" :
                      pot.stage === "flowering" ? "plant_flowering" : "plant_ready";
-      const ps = this.add.image(0, -30, texKey).setScale(0.8);
+      const ps = this.add.image(0, -24, texKey).setScale(0.85);
       const strain = getStrain(pot.strainId);
       if (strain) ps.setTint(strain.color);
       container2.add(ps);
@@ -394,7 +380,10 @@ export class FarmScene extends Phaser.Scene {
         this.glowTweens[i] = tween;
       }
 
-      const stageTxt = this.add.text(0, -55, pot.stage.toUpperCase(), { fontSize: "9px", color: "#aaffaa", fontStyle: "bold" }).setOrigin(0.5);
+      const stageColors: Record<string, string> = { planted: "#aaa", seedling: "#aaffaa", vegetative: "#00e676", flowering: "#b9f6ca", ready: "#ffd700" };
+      const stageTxt = this.add.text(0, -52, pot.stage === "ready" ? "✂️ HARVEST" : pot.stage.toUpperCase(), {
+        fontSize: "9px", color: stageColors[pot.stage] ?? "#aaa", fontStyle: "bold"
+      }).setOrigin(0.5);
       container2.add(stageTxt);
     }
 
@@ -406,11 +395,15 @@ export class FarmScene extends Phaser.Scene {
     this.nutrientBars[i] = nBar;
     this.drawPotBars(i);
 
-    const label = this.add.text(0, 30, `#${i + 1}`, { fontSize: "10px", color: "#888888" }).setOrigin(0.5);
+    const label = this.add.text(0, 38, `#${i + 1}`, { fontSize: "10px", color: "#666" }).setOrigin(0.5);
     container2.add(label);
 
     const hitArea = this.add.rectangle(0, 0, POT_W - 10, POT_H - 10, 0xffffff, 0).setInteractive({ cursor: "pointer" });
-    hitArea.on("pointerdown", () => EventBus.emit(EV.POT_CLICKED, { potIndex: i, pot }));
+    const hl = this.add.graphics();
+    container2.add(hl);
+    hitArea.on("pointerover", () => { hl.lineStyle(3, 0x00ff88, 1); hl.strokeRect(-POT_W / 2 + 5, -POT_H / 2 + 5, POT_W - 10, POT_H - 10); });
+    hitArea.on("pointerout", () => hl.clear());
+    hitArea.on("pointerdown", () => EventBus.emit(EV.POT_CLICKED, { potIndex: i, pot: this.state.pots[i] }));
     container2.add(hitArea);
 
     this.potContainers[i] = container2;
@@ -552,6 +545,29 @@ export class FarmScene extends Phaser.Scene {
   }
 
   handleBuyItem({ itemId, isSeed, strainId }: { itemId: string; isSeed?: boolean; strainId?: string }) {
+    // Seeds are not in SHOP_ITEMS — handle them directly from strain data
+    if (isSeed && strainId) {
+      const strain = getStrain(strainId);
+      if (!strain) return;
+      if (this.state.level < strain.unlockLevel) {
+        EventBus.emit(EV.NOTIFICATION, { msg: `🔒 Requires Level ${strain.unlockLevel}`, type: "error" });
+        return;
+      }
+      if (this.state.money < strain.seedCost) {
+        EventBus.emit(EV.NOTIFICATION, { msg: "Not enough money!", type: "error" });
+        Audio.error();
+        return;
+      }
+      this.state.money -= strain.seedCost;
+      const seedKey = `seed_${strainId}`;
+      this.state.inventory[seedKey] = (this.state.inventory[seedKey] ?? 0) + 1;
+      Audio.buy();
+      EventBus.emit(EV.NOTIFICATION, { msg: `🌱 Bought 1x ${strain.name} seed`, type: "success" });
+      EventBus.emit(EV.STATE_UPDATE, this.state);
+      saveState(this.state);
+      return;
+    }
+
     const item = SHOP_ITEMS.find(i => i.id === itemId);
     if (!item || item.currency !== "cash") return;
     if (this.state.level < item.unlockLevel) {
@@ -600,6 +616,29 @@ export class FarmScene extends Phaser.Scene {
   }
 
   handleBuyItemToken({ itemId, isSeed, strainId }: { itemId: string; isSeed?: boolean; strainId?: string }) {
+    // Token-gated seeds
+    if (isSeed && strainId) {
+      const strain = getStrain(strainId);
+      if (!strain) return;
+      if (this.state.level < strain.unlockLevel) {
+        EventBus.emit(EV.NOTIFICATION, { msg: `🔒 Requires Level ${strain.unlockLevel}`, type: "error" });
+        return;
+      }
+      if (this.state.weedTokens < strain.seedCost) {
+        EventBus.emit(EV.NOTIFICATION, { msg: `Need ${strain.seedCost} $WEED tokens!`, type: "error" });
+        Audio.error();
+        return;
+      }
+      this.state.weedTokens -= strain.seedCost;
+      const seedKey = `seed_${strainId}`;
+      this.state.inventory[seedKey] = (this.state.inventory[seedKey] ?? 0) + 1;
+      Audio.buy();
+      EventBus.emit(EV.NOTIFICATION, { msg: `🌱 Bought 1x ${strain.name} seed with $WEED`, type: "success" });
+      EventBus.emit(EV.STATE_UPDATE, this.state);
+      saveState(this.state);
+      return;
+    }
+
     const item = SHOP_ITEMS.find(i => i.id === itemId);
     if (!item || item.currency !== "weed_token") return;
     if (this.state.level < item.unlockLevel) {
