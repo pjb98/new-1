@@ -73,6 +73,7 @@ import { catchFish, fishXp } from '../fishing';
 import { pickForage, forageXp, type Forage } from '../forage';
 import { bus } from '../EventBus';
 import { sfx } from '../audio';
+import { consumeGrowRoomHarvest } from './GrowRoomScene';
 
 type Tile = { tilled: boolean; wetUntil: number; obstacle: boolean };
 type Crop = {
@@ -199,6 +200,7 @@ export class FarmScene extends Phaser.Scene {
   private gate?: Phaser.GameObjects.Sprite;
   private gateOpen = false;
   private animalCounts: Record<string, number> = {};
+  private _enteringRoom = false;
 
   // skill progression (xp per skill) + chosen milestone perks
   private skills: Skills = { ...EMPTY_SKILLS };
@@ -376,6 +378,23 @@ export class FarmScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
       this.unsubs = [];
+    });
+
+    // When returning from indoor grow room: merge indoor harvests into bag
+    this.events.on(Phaser.Scenes.Events.WAKE, () => {
+      this._enteringRoom = false;
+      this.cameras.main.fadeIn(400);
+      // Pull harvested indoor crops into the outdoor harvest bag
+      try {
+        const indoor = consumeGrowRoomHarvest();
+        for (const [key, count] of Object.entries(indoor)) {
+          this.harvestInv[key] = (this.harvestInv[key] ?? 0) + count;
+        }
+        if (Object.keys(indoor).length > 0) {
+          this.toast(`Indoor harvest ready! Check your Stash 💰`);
+          this.emitState();
+        }
+      } catch (_) {}
     });
 
     if (this.persist) {
@@ -2216,6 +2235,27 @@ export class FarmScene extends Phaser.Scene {
       this.player.anims.play(`idle-${this.facing}`, true);
     }
     this.player.setDepth(this.player.y + 18);
+
+    // Enter grow room: player walks onto house door tile
+    if (!this._enteringRoom) {
+      const doorPx = HOME.houseCx * TILE + TILE / 2;
+      const doorPy = (HOME.houseBaseRow + 1) * TILE;
+      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, doorPx, doorPy);
+      if (dist < TILE * 1.2) {
+        this._enteringRoom = true;
+        this.player.setVelocity(0, 0);
+        this.cameras.main.fadeOut(300, 0, 0, 0, (_: Phaser.Cameras.Scene2D.Camera, p: number) => {
+          if (p === 1) {
+            this.scene.sleep('Farm');
+            this.scene.launch('GrowRoom', {
+              upgrades: { ...this.upgrades },
+              coins: this.coins,
+              seeds: { ...this.seeds },
+            });
+          }
+        });
+      }
+    }
 
     // Swing the orchard gate open when the farmer is near.
     if (this.gate) {
