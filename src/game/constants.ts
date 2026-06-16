@@ -37,7 +37,7 @@ export const COLORS = {
 
 export type Tool = { id: 'hoe' | 'can' | 'seed'; label: string };
 export const TOOLS: Tool[] = [
-  { id: 'hoe', label: 'Hoe' },
-  { id: 'can', label: 'Watering Can' },
-  { id: 'seed', label: 'Seeds' },
+  { id: 'hoe', label: 'Trowel' },
+  { id: 'can', label: 'Water' },
+  { id: 'seed', label: 'Plant' },
 ];

@@ -17,7 +17,7 @@ export function BagPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="panel">
       <div className="panel-head">
-        <h3>🎒 Harvest</h3>
+        <h3>💰 Stash</h3>
         {rows.length > 0 && (
           <button className="btn sm gold" onClick={() => bus.emit('ui:sellAll', undefined)}>
             Sell all (+{total.toLocaleString()}🪙)
@@ -26,7 +26,7 @@ export function BagPanel({ onClose }: { onClose: () => void }) {
         <button className="x" onClick={onClose}><img className="ui-x" src="assets/sprout-ui/ui_x.png" alt="✕" /></button>
       </div>
       {rows.length === 0 ? (
-        <p className="empty">Nothing harvested yet. Plant a seed, water it, and wait for it to grow!</p>
+        <p className="empty">Your stash is empty. Plant a strain, water it, and harvest when ready!</p>
       ) : (
         <div className="rows">
           {rows.map(({ k, plant, mutation, wet, count, unit }) => {

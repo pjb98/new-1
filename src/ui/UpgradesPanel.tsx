@@ -9,8 +9,8 @@ export function UpgradesPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="panel">
       <div className="panel-head">
-        <h3>⬆️ Upgrades</h3>
-        <span className="muted">permanent boosts</span>
+        <h3>💡 Grow Op</h3>
+        <span className="muted">lights · pots · nutrients</span>
         <button className="x" onClick={onClose}><img className="ui-x" src="assets/sprout-ui/ui_x.png" alt="✕" /></button>
       </div>
       <div className="rows">

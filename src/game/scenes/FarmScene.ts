@@ -33,6 +33,9 @@ import {
   UPGRADE_BY_ID,
   fortuneLuck,
   growthFactor,
+  lightsFactor,
+  potsBonus,
+  trimBonus,
   harvestXp,
   levelInfo,
   marketBonus,
@@ -1326,6 +1329,8 @@ export class FarmScene extends Phaser.Scene {
       cropValue(PLANT_BY_ID[plantId], MUTATION_BY_ID[mutId], wet === '1') *
         count *
         marketBonus(this.upgrades.market) *
+        potsBonus(this.upgrades.pots) *
+        trimBonus(this.upgrades.trim) *
         this.mods().cropValueMult,
     );
     delete this.harvestInv[key];
@@ -1343,7 +1348,7 @@ export class FarmScene extends Phaser.Scene {
       const [plantId, mutId, wet] = key.split('|');
       total += cropValue(PLANT_BY_ID[plantId], MUTATION_BY_ID[mutId], wet === '1') * count;
     }
-    total = Math.round(total * marketBonus(this.upgrades.market) * this.mods().cropValueMult);
+    total = Math.round(total * marketBonus(this.upgrades.market) * potsBonus(this.upgrades.pots) * trimBonus(this.upgrades.trim) * this.mods().cropValueMult);
     if (total <= 0) {
       this.toast('Nothing to sell');
       return;
@@ -2230,7 +2235,7 @@ export class FarmScene extends Phaser.Scene {
     for (const crop of this.crops.values()) {
       if (crop.mature) continue;
       const wet = this.isWet(crop.tx, crop.ty);
-      crop.grownMs += delta * (wet ? 2 : 1) * this.growthMult * growthFactor(this.upgrades.growth) * this.mods().cropGrowthMult;
+      crop.grownMs += delta * (wet ? 2 : 1) * this.growthMult * growthFactor(this.upgrades.growth) * lightsFactor(this.upgrades.lights) * this.mods().cropGrowthMult;
       const total = crop.plant.growthSeconds * 1000;
       const ns = Math.min(STAGES - 1, Math.floor((crop.grownMs / total) * (STAGES - 1)));
       if (ns !== crop.stage && ns < STAGES - 1) {
