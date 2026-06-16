@@ -142,6 +142,7 @@ export class GrowRoomScene extends Phaser.Scene {
     this.fastForwardGrowth();
 
     this.buildRoom();
+    this.createPotTextures();
     this.buildPots();
     this.buildPlayer();
     this.buildLights();
@@ -244,6 +245,46 @@ export class GrowRoomScene extends Phaser.Scene {
     this.add.rectangle(W / 2, H / 2, W - 2 * TILE, H - 2 * TILE, 0x00ff44).setAlpha(0.04).setDepth(-1);
   }
 
+  private createPotTextures() {
+    const configs = [
+      { key: 'pot0', body: 0xc1440e, rim: 0xe05c1a, shadow: 0x8b2e08, soil: 0x3d2010 },
+      { key: 'pot1', body: 0x8b2e08, rim: 0xc1440e, shadow: 0x5e1e04, soil: 0x2a1a08 },
+      { key: 'pot2', body: 0x4a7c3f, rim: 0x6aad58, shadow: 0x2e5226, soil: 0x1a2e12 },
+      { key: 'pot3', body: 0x2255aa, rim: 0x4488dd, shadow: 0x113377, soil: 0x0a1a3a },
+    ];
+    for (const cfg of configs) {
+      if (this.textures.exists(cfg.key)) continue;
+      const W = 40; const H = 36;
+      const rt = this.add.renderTexture(0, 0, W, H).setVisible(false);
+      const g = this.add.graphics();
+      // Shadow ellipse at base
+      g.fillStyle(0x000000, 0.25);
+      g.fillEllipse(W / 2, H - 4, 34, 8);
+      // Pot body
+      g.fillStyle(cfg.body, 1);
+      g.fillRect(6, 14, 28, 18);
+      g.fillTriangle(6, 14, 4, 32, 6, 32);
+      g.fillTriangle(34, 14, 36, 32, 34, 32);
+      // Front highlight
+      g.fillStyle(cfg.rim, 0.3);
+      g.fillRect(10, 18, 20, 12);
+      // Rim
+      g.fillStyle(cfg.rim, 1);
+      g.fillRect(4, 10, 32, 6);
+      g.fillRect(2, 8, 36, 4);
+      // Soil inside rim
+      g.fillStyle(cfg.soil, 1);
+      g.fillEllipse(W / 2, 12, 26, 8);
+      // Shadow
+      g.fillStyle(cfg.shadow, 0.5);
+      g.fillRect(6, 26, 4, 6);
+      rt.draw(g, 0, 0);
+      rt.saveTexture(cfg.key);
+      g.destroy();
+      rt.destroy();
+    }
+  }
+
   private buildPots() {
     this.potPos = [];
     this.potSprites = [];
@@ -260,11 +301,9 @@ export class GrowRoomScene extends Phaser.Scene {
       const py = g.y0 + row * g.sy;
       this.potPos.push({ x: px, y: py });
 
-      // Pot base (tilled soil, tinted like a pot)
-      const potTint = this.upgrades.pots >= 3 ? 0x4488ff :
-                      this.upgrades.pots >= 2 ? 0x66aa44 :
-                      this.upgrades.pots >= 1 ? 0x886622 : 0x7a5230;
-      const pot = this.add.image(px, py + 4, 'tilled', 3).setScale(2.5).setTint(potTint).setDepth(py);
+      // Pot base — drawn texture based on upgrade level
+      const potKey = `pot${Math.min(this.upgrades.pots, 3)}`;
+      const pot = this.add.image(px, py + 4, potKey).setScale(2).setDepth(py);
       this.potSprites.push(pot);
 
       // Crop sprite (hidden if empty)
