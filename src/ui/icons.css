@@ -1,0 +1,99 @@
+/* Sprout Lands pixel-icon styles.
+   Imported after index.css so these override where needed.
+   Note: .hud-icon (coins/star) is defined in index.css — do NOT redefine it. */
+
+/* Crisp pixel rendering for every cropped sprite icon. */
+.tool-ico,
+.btn-ico,
+.ui-x {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  display: inline-block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Hotbar tool sprites (hoe / watering can / seed sprout). */
+.tool-ico {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+/* HUD toolbar button icons + day/night phase badge icons. */
+.btn-ico {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  vertical-align: -4px;
+}
+
+/* The phase icon sits inline with the "Day N · 00:00" badge text;
+   it already carries its own rounded tile background from the sheet. */
+.badge .btn-ico {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: -4px;
+}
+
+/* Day/night cycle tile (sun / sun+cloud / moon+cloud / moon) — swaps with the
+   game phase and gently floats so it feels alive. */
+.phase-ico {
+  width: 22px;
+  height: 22px;
+  image-rendering: pixelated;
+  vertical-align: -7px;
+  margin-right: 5px;
+  animation: phase-bob 3s ease-in-out infinite;
+}
+@keyframes phase-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Square HUD buttons center their icon. They're now flat icons sitting on the
+   wooden tray (the .hud-buttons frame), so a 24px icon reads clearly with a
+   soft hover highlight behind it. */
+.iconbtn .btn-ico {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+}
+
+/* Panel close-button X. */
+.ui-x {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+/* Crop seed-packet / produce icons in panels and the hotbar. */
+.crop-ico,
+.crop-ico-sm {
+  image-rendering: pixelated;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.crop-ico {
+  width: 30px;
+  height: 30px;
+}
+
+.crop-ico-sm {
+  width: 24px;
+  height: 24px;
+}
+
+/* Skill / upgrade row icons — real pack sprites (was emoji). */
+.upg-icon-img {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  vertical-align: middle;
+}

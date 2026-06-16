@@ -1,13 +1,8 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import { WalletProvider } from "./chain/WalletProvider";
-import "./style.css";
+import { createRoot } from 'react-dom/client';
+import '@solana/wallet-adapter-react-ui/styles.css';
+import './index.css';
+import './ui/icons.css';
+import './ui/theme.css';
+import { App } from './ui/App';
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <WalletProvider>
-      <App />
-    </WalletProvider>
-  </React.StrictMode>
-);
+createRoot(document.getElementById('root')!).render(<App />);

@@ -1,37 +1,43 @@
-export const GAME_W = 1280;
-export const GAME_H = 720;
+import { WORLD_COLS, WORLD_ROWS } from './plots';
 
-// Game time: 1 real second = 1 game minute. 1440 real seconds = 1 game day
-export const REAL_MS_PER_GAME_MIN = 1000;
-export const GAME_MINS_PER_DAY = 1440;
+export const TILE = 32;
+// World grid (bigger than the screen — the camera follows the player). Derived
+// from the 5×2 homestead neighbourhood geometry (see plots.ts) so the world is
+// always exactly big enough to hold every homestead plus its grass margin.
+export const GRID_W = WORLD_COLS;
+export const GRID_H = WORLD_ROWS;
+export const WORLD_WIDTH = TILE * GRID_W;
+export const WORLD_HEIGHT = TILE * GRID_H;
+// Camera viewport / canvas size (what's on screen at once).
+export const GAME_WIDTH = 960;
+export const GAME_HEIGHT = 576;
 
-export const WATER_DECAY_PER_MIN = 0.05;   // % per game minute
-export const NUTRIENT_DECAY_PER_MIN = 0.02;
+export const PLAYER_SPEED = 175;
+export const REACH = 2; // how many tiles away the player can act
+export const STARTING_COINS = 300;
 
-export const QUALITY_BOOST_WATER = 0.01;   // per minute well-watered
-export const QUALITY_PENALTY_DRY = 0.03;   // per minute under-watered
-export const QUALITY_BOOST_FED = 0.008;
-
-export const HEAT_DECAY_PER_MIN = 0.05;    // heat cools over time
-
-export const WEED_TOKEN_MINT = "WEEDxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // placeholder devnet
-export const WEED_TOKEN_REQUIRED = 1000;
+// Real-time growth + world timing.
+export const STAGES = 4; // crop visual stages (0..3)
+export const WET_MS = 45_000; // how long soil stays watered (2x growth while wet)
+export const DAY_LENGTH_MS = 8 * 60_000; // full day/night cycle
+export const RESTOCK_MS = 120_000; // seed shop restock interval
 
 export const COLORS = {
-  bg: 0x0d0d0d,
-  room: 0x1a1a2e,
-  floor: 0x16213e,
-  wall: 0x0f3460,
-  pot: 0x4a3728,
-  soil: 0x2d1b0e,
-  water: 0x4fc3f7,
-  panel: 0x1e1e2e,
-  panelBorder: 0x313244,
-  green: 0x4caf50,
-  gold: 0xffd700,
-  red: 0xf44336,
-  purple: 0x9c27b0,
-  text: 0xffffff,
-  dim: 0x888888,
-  weedToken: 0x00e676,
+  grass: 0x5fa64d,
+  grassDark: 0x4d8a3e,
+  grassLight: 0x79c161,
+  soil: 0x7a5230,
+  soilDark: 0x5e3f24,
+  soilWet: 0x533620,
+  soilWetDark: 0x3d2716,
+  water: 0x3b82c4,
+  waterLight: 0x63a6e0,
+  waterDark: 0x2c66a0,
 };
+
+export type Tool = { id: 'hoe' | 'can' | 'seed'; label: string };
+export const TOOLS: Tool[] = [
+  { id: 'hoe', label: 'Hoe' },
+  { id: 'can', label: 'Watering Can' },
+  { id: 'seed', label: 'Seeds' },
+];
