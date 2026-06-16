@@ -156,8 +156,11 @@ export class FarmView {
   private raycaster = new THREE.Raycaster();
   private t = 0;
   private grow_light?: THREE.SpotLight;
+  private _clickHandler?: (e: MouseEvent) => void;
+  private _renderer?: THREE.WebGLRenderer;
 
   init(renderer: THREE.WebGLRenderer, state: GameState) {
+    this._renderer = renderer;
     this.scene.background = new THREE.Color(0x0d1117);
     this.scene.fog = new THREE.Fog(0x0d1117, 12, 22);
 
@@ -228,8 +231,9 @@ export class FarmView {
       this.potMeshes.push(pm);
     });
 
-    // Click handler
-    renderer.domElement.addEventListener("click", (e) => this.onClick(e, renderer, state));
+    // Click handler stored so ThreeApp can remove it on scene switch
+    this._clickHandler = (e: MouseEvent) => this.onClick(e, renderer, state);
+    renderer.domElement.addEventListener("click", this._clickHandler);
   }
 
   private onClick(e: MouseEvent, renderer: THREE.WebGLRenderer, state: GameState) {
@@ -273,6 +277,8 @@ export class FarmView {
   }
 
   dispose() {
-    // scene is just dropped; renderer stays alive
+    if (this._clickHandler && this._renderer) {
+      this._renderer.domElement.removeEventListener("click", this._clickHandler);
+    }
   }
 }

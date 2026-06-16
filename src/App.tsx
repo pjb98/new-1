@@ -17,10 +17,11 @@ export default function App() {
     if (appRef.current) return;
     if (!canvasRef.current) return;
 
+    // Register before init — ThreeApp emits GAME_READY synchronously inside init()
+    EventBus.once(EV.GAME_READY, () => setGameReady(true));
     const app = new ThreeApp();
     app.init(canvasRef.current);
     appRef.current = app;
-    EventBus.on(EV.GAME_READY, () => setGameReady(true));
 
     return () => {
       appRef.current?.destroy();

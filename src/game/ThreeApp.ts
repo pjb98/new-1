@@ -68,6 +68,7 @@ export class ThreeApp {
   private showFarm() {
     this.streetView?.dispose();
     this.streetView = undefined;
+    this.farmView?.dispose();
     this.farmView = new FarmView();
     this.farmView.init(this.renderer, this.state);
     this.currentScene = "farm";
@@ -83,6 +84,7 @@ export class ThreeApp {
   }
 
   private switchScene(to: "farm" | "street") {
+    if (this.currentScene === to) return;
     saveState(this.state);
     if (to === "street") this.showStreet();
     else this.showFarm();

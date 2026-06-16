@@ -23,6 +23,7 @@ class NpcChar {
   private baseX: number;
   private dir = 1;
   private t = 0;
+  private _didGoHome = false;
 
   constructor(color: number, x: number, z: number) {
     this.char = new VoxelChar(color, 0xf4c2a1);
@@ -50,6 +51,7 @@ export class StreetView {
   private npcs: NpcChar[] = [];
   private keys: Record<string, boolean> = {};
   private t = 0;
+  private _didGoHome = false;
   private keyDown!: (e: KeyboardEvent) => void;
   private keyUp!: (e: KeyboardEvent) => void;
 
@@ -193,8 +195,9 @@ export class StreetView {
     // NPCs
     this.npcs.forEach(n => n.update(dt));
 
-    // If player walks to north edge → go home
-    if (this.player.root.position.z <= -STREET_LENGTH / 2 + 0.5) {
+    // If player walks to north edge → go home (fire once, not every frame)
+    if (!this._didGoHome && this.player.root.position.z <= -STREET_LENGTH / 2 + 0.5) {
+      this._didGoHome = true;
       Audio.buy();
       EventBus.emit("action:go_farm");
     }
