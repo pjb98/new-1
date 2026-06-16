@@ -195,45 +195,52 @@ export class GrowRoomScene extends Phaser.Scene {
     const W = ROOM_COLS * TILE;
     const H = ROOM_ROWS * TILE;
 
-    // Dark background
-    this.add.rectangle(W / 2, H / 2, W, H, 0x1a0a2e).setDepth(-10);
+    // --- Background wall (back wall color) ---
+    this.add.rectangle(W / 2, H / 2, W, H, 0x2e1f0e).setDepth(-10);
 
-    // Wood floor: 3×3 furniture tiles — use tilled soil tinted warm brown
-    for (let tx = 1; tx < ROOM_COLS - 1; tx++) {
-      for (let ty = 1; ty < ROOM_ROWS - 1; ty++) {
-        const frame = ((tx + ty) % 3);
-        const img = this.add.image(tx * TILE + TILE / 2, ty * TILE + TILE / 2, 'tilled', frame)
-          .setScale(2).setTint(0x8b6914).setDepth(-5);
-        img.setAlpha(0.6);
-      }
+    // --- Floor (warm wood planks) ---
+    // Alternate two shades of wood for a plank effect
+    for (let ty = 1; ty < ROOM_ROWS - 1; ty++) {
+      const shade = ty % 2 === 0 ? 0x7a5230 : 0x8a6240;
+      this.add.rectangle(W / 2, ty * TILE + TILE / 2, W - 2 * TILE, TILE, shade).setDepth(-8);
+      // Plank groove lines
+      this.add.rectangle(W / 2, ty * TILE + TILE - 1, W - 2 * TILE, 2, 0x5a3a1a).setDepth(-7);
     }
 
-    // Walls: top & bottom
-    for (let tx = 0; tx < ROOM_COLS; tx++) {
-      this.add.image(tx * TILE + TILE / 2, TILE / 2, 'furniture', 0).setScale(2).setTint(0x3d2b1f).setDepth(-3);
-      this.add.image(tx * TILE + TILE / 2, (ROOM_ROWS - 1) * TILE + TILE / 2, 'furniture', 0).setScale(2).setTint(0x3d2b1f).setDepth(-3);
-    }
-    // Side walls
-    for (let ty = 0; ty < ROOM_ROWS; ty++) {
-      this.add.image(TILE / 2, ty * TILE + TILE / 2, 'furniture', 0).setScale(2).setTint(0x3d2b1f).setDepth(-3);
-      this.add.image((ROOM_COLS - 1) * TILE + TILE / 2, ty * TILE + TILE / 2, 'furniture', 0).setScale(2).setTint(0x3d2b1f).setDepth(-3);
-    }
+    // --- Back wall (top 2 rows) — lighter color ---
+    this.add.rectangle(W / 2, TILE, W, TILE * 2, 0x4a3020).setDepth(-6);
+    // Wall trim / shadow line
+    this.add.rectangle(W / 2, TILE * 2 + 1, W, 3, 0x2a1a08).setDepth(-5);
 
-    // Door at bottom center
-    const doorX = Math.floor(ROOM_COLS / 2) * TILE;
+    // --- Side walls ---
+    this.add.rectangle(TILE / 2, H / 2, TILE, H, 0x3a2010).setDepth(-6);
+    this.add.rectangle(W - TILE / 2, H / 2, TILE, H, 0x3a2010).setDepth(-6);
 
-    const _doorY = (ROOM_ROWS - 1) * TILE;
-    this.add.rectangle(doorX, _doorY, TILE * 2, TILE * 2, 0x7c4a1e).setOrigin(0, 0).setDepth(-2);
+    // --- Bottom wall ---
+    this.add.rectangle(W / 2, H - TILE / 2, W, TILE, 0x3a2010).setDepth(-6);
 
-    // Workstation (trimming desk) top-left corner
-    this.add.image(2 * TILE, 2 * TILE, 'workstation').setScale(2).setDepth(2 * TILE);
+    // --- Door at bottom center ---
+    const doorX = Math.floor(ROOM_COLS / 2) * TILE + TILE / 2;
+    const doorY = H - TILE;
+    // Door frame
+    this.add.rectangle(doorX, doorY, TILE * 2 + 6, TILE + 4, 0x6b3a10).setDepth(-4);
+    // Door panel
+    this.add.rectangle(doorX, doorY, TILE * 2 - 4, TILE - 4, 0x8b5a2a).setDepth(-3);
+    // Door knob
+    this.add.circle(doorX + 14, doorY, 3, 0xffd700).setDepth(-2);
 
-    // Decor: potted plants on shelves
-    this.add.image((ROOM_COLS - 3) * TILE, 2 * TILE, 'furniture', 12).setScale(2).setDepth(2 * TILE);
-    this.add.image((ROOM_COLS - 2) * TILE, 2 * TILE, 'furniture', 13).setScale(2).setDepth(2 * TILE);
+    // --- Workstation (trimming desk) top-left ---
+    this.add.image(2 * TILE + TILE / 2, 2 * TILE + TILE / 2, 'workstation').setScale(2).setDepth(200);
 
-    // Chest / stash box
+    // --- Chest / stash box bottom-right ---
     this.add.image((ROOM_COLS - 3) * TILE, (ROOM_ROWS - 3) * TILE, 'chest', 1).setScale(2).setDepth((ROOM_ROWS - 3) * TILE);
+
+    // --- Decor shelves top-right ---
+    this.add.image((ROOM_COLS - 3) * TILE, 2 * TILE, 'furniture', 12).setScale(2).setDepth(200);
+    this.add.image((ROOM_COLS - 2) * TILE, 2 * TILE, 'furniture', 13).setScale(2).setDepth(200);
+
+    // --- Green ambient glow (grow op feel) ---
+    this.add.rectangle(W / 2, H / 2, W - 2 * TILE, H - 2 * TILE, 0x00ff44).setAlpha(0.04).setDepth(-1);
   }
 
   private buildPots() {
@@ -293,26 +300,27 @@ export class GrowRoomScene extends Phaser.Scene {
 
   private buildLights() {
     const lightsLvl = this.upgrades.lights;
-    if (lightsLvl === 0) return;
-
     const W = ROOM_COLS * TILE;
-    const lightColors = [0xffffff, 0xfffae0, 0xfff5c0, 0xffecaa];
-    const color = lightColors[Math.min(lightsLvl - 1, 3)];
-    const alpha = 0.07 + lightsLvl * 0.04;
+    const H = ROOM_ROWS * TILE;
 
-    // Ceiling light strips above each pot column
+    // Always show ceiling light bars (even with no upgrades — basic room lighting)
+    const barColor = lightsLvl === 0 ? 0xaaaaaa : [0xffe4a0, 0xfff0c0, 0xfff8d0, 0xffffff][lightsLvl - 1];
+    const barAlpha = lightsLvl === 0 ? 0.4 : 0.95;
+    const glowAlpha = lightsLvl === 0 ? 0.03 : 0.06 + lightsLvl * 0.04;
+    const glowColor = lightsLvl === 0 ? 0xffffff : [0xffcc44, 0xffdd88, 0xffeeaa, 0xffffff][lightsLvl - 1];
+
     const g = this.potGridOrigin();
     for (let col = 0; col < POT_COLS; col++) {
       const lx = g.x0 + col * g.sx;
-      // Light bar sprite at ceiling
-      const bar = this.add.rectangle(lx, TILE * 1.5, 20, TILE * 0.6, color).setAlpha(0.9).setDepth(1000);
+      // Ceiling light bar
+      const bar = this.add.rectangle(lx, TILE + 4, 24, 8, barColor).setAlpha(barAlpha).setDepth(1000);
       this.lightBeams.push(bar);
-      // Soft cone below
-      const cone = this.add.rectangle(lx, TILE * 5, 60 + lightsLvl * 12, (ROOM_ROWS - 3) * TILE, color).setAlpha(alpha).setDepth(-1);
+      // Light cone downward
+      const cone = this.add.rectangle(lx, TILE * 4, 56 + lightsLvl * 14, (ROOM_ROWS - 4) * TILE, glowColor).setAlpha(glowAlpha).setDepth(-1);
       this.lightBeams.push(cone);
     }
-    // Warm ambient overlay
-    this.add.rectangle(W / 2, (ROOM_ROWS / 2) * TILE, W, ROOM_ROWS * TILE, color).setAlpha(alpha * 0.5).setDepth(-1);
+    // Ambient fill
+    this.add.rectangle(W / 2, H / 2, W - 2 * TILE, H - 2 * TILE, glowColor).setAlpha(glowAlpha * 0.4).setDepth(-1);
   }
 
   private setupCamera() {
