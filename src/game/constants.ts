@@ -14,7 +14,7 @@ export const GAME_HEIGHT = 576;
 
 export const PLAYER_SPEED = 175;
 export const REACH = 2; // how many tiles away the player can act
-export const STARTING_COINS = 300;
+export const STARTING_COINS = 50_000;
 
 // Real-time growth + world timing.
 export const STAGES = 4; // crop visual stages (0..3)

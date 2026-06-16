@@ -12,7 +12,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     pixelArt: true,
-    backgroundColor: '#6fae52',
+    backgroundColor: '#1a1a2e',
     // Fill the window and let the camera reveal more of the world on big screens.
     scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
     physics: { default: 'arcade', arcade: { debug: false } },
