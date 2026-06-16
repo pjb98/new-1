@@ -2241,19 +2241,18 @@ export class FarmScene extends Phaser.Scene {
       const doorPx = HOME.houseCx * TILE + TILE / 2;
       const doorPy = (HOME.houseBaseRow + 1) * TILE + TILE / 2;
       const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, doorPx, doorPy);
-      if (dist < TILE * 3) {
+      if (dist < TILE * 1.8) {
         this._enteringRoom = true;
         this.player.setVelocity(0, 0);
-        this.cameras.main.fadeOut(300, 0, 0, 0, (_: Phaser.Cameras.Scene2D.Camera, p: number) => {
-          if (p === 1) {
-            this.scene.sleep('Farm');
-            this.scene.launch('GrowRoom', {
-              upgrades: { ...this.upgrades },
-              coins: this.coins,
-              seeds: { ...this.seeds },
-            });
-          }
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+          this.scene.sleep('Farm');
+          this.scene.launch('GrowRoom', {
+            upgrades: { ...this.upgrades },
+            coins: this.coins,
+            seeds: { ...this.seeds },
+          });
         });
+        this.cameras.main.fadeOut(300, 0, 0, 0);
       }
     }
 

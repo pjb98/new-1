@@ -559,11 +559,10 @@ export class GrowRoomScene extends Phaser.Scene {
     this.player.setVelocity(0, 0);
     saveGrowRoom(this.state);
     sfx.play('step');
-    this.cameras.main.fadeOut(300, 0, 0, 0, (_: Phaser.Cameras.Scene2D.Camera, progress: number) => {
-      if (progress === 1) {
-        this.scene.stop('GrowRoom');
-        this.scene.wake('Farm');
-      }
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.stop('GrowRoom');
+      this.scene.wake('Farm');
     });
+    this.cameras.main.fadeOut(300, 0, 0, 0);
   }
 }
