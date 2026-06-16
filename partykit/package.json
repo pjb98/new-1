@@ -1,0 +1,14 @@
+{
+  "name": "tiny-dead-partykit",
+  "private": true,
+  "description": "Always-on PartyKit relay for Tiny Dead online co-op.",
+  "scripts": {
+    "dev": "partykit dev",
+    "deploy": "partykit deploy",
+    "login": "partykit login"
+  },
+  "devDependencies": {
+    "partykit": "latest",
+    "typescript": "^5.6.3"
+  }
+}

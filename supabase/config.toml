@@ -1,0 +1,8 @@
+# Supabase project config for Tiny Dead cloud-save.
+#
+# The `save` Edge Function performs its OWN wallet-signature authentication, so
+# it must be invocable WITHOUT a Supabase JWT / anon key — the static game client
+# calls it directly from the browser. Disabling verify_jwt allows that.
+
+[functions.save]
+verify_jwt = false

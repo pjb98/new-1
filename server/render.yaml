@@ -1,0 +1,17 @@
+# Render.com Blueprint for the tiny WebSocket relay/rooms server.
+# Render injects PORT automatically; the server reads process.env.PORT.
+# Deploy by pointing Render at this repo with rootDir = server/.
+services:
+  - type: web
+    name: tiny-dead-server
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # PORT is provided by Render automatically; no need to set it here.
