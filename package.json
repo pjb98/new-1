@@ -1,41 +1,30 @@
 {
-  "name": "tiny-dead",
+  "name": "weed-sim",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Tiny Dead — a cozy toy-diorama take on round-based zombie survival.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --port 4173",
-    "typecheck": "tsc --noEmit",
-    "test:rating": "node --test --experimental-strip-types test/houserating.test.ts",
-    "test:save": "node --test --experimental-strip-types test/save.test.ts",
-    "test:house": "node --import ./test/resolve-hook.mjs --test --experimental-transform-types test/house.test.ts",
-    "test:rounds": "node --test --experimental-strip-types test/rounds.test.ts",
-    "test:island": "node --test --experimental-strip-types test/island.test.ts",
-    "test:idle": "node --import ./test/resolve-hook.mjs --test --experimental-strip-types test/idle.test.ts",
-    "test:gacha": "node --import ./test/resolve-hook.mjs --test --experimental-transform-types test/gacha.test.ts",
-    "test:bwshop": "node --test --experimental-strip-types test/bwshop.test.ts",
-    "test:bwresources": "node --test --experimental-strip-types test/bwresources.test.ts",
-    "test:bwteams": "node --test --experimental-strip-types test/bwteams.test.ts",
-    "test:bwupgrades": "node --test --experimental-strip-types test/bwupgrades.test.ts",
-    "test:tdpath": "node --test --experimental-strip-types test/tdpath.test.ts",
-    "test:tdtowers": "node --test --experimental-strip-types test/tdtowers.test.ts",
-    "test:tdwaves": "node --test --experimental-strip-types test/tdwaves.test.ts",
-    "test:tdduel": "node --import ./test/resolve-hook.mjs --test --experimental-transform-types test/tdduel.test.ts",
-    "test:tddaily": "node --test --experimental-strip-types test/tddaily.test.ts",
-    "test:wager": "node --test --experimental-strip-types test/wager.test.ts",
-    "test:hublayout": "node --test --experimental-strip-types test/hublayout.test.ts",
-    "test": "npm run test:rating && npm run test:save && npm run test:house && npm run test:rounds && npm run test:island && npm run test:idle && npm run test:build && npm run test:gacha && npm run test:bwshop && npm run test:bwresources && npm run test:bwteams && npm run test:bwupgrades && npm run test:tdpath && npm run test:tdtowers && npm run test:tdwaves && npm run test:tdduel && npm run test:tddaily && npm run test:wager && npm run test:hublayout",
-    "test:build": "node --import ./test/resolve-hook.mjs --test --experimental-transform-types test/build.test.ts"
-  },
-  "devDependencies": {
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "three": "^0.170.0",
-    "@types/three": "^0.170.0"
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-phantom": "^0.9.24",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-solflare": "^0.6.28",
+    "@solana/web3.js": "^1.98.0",
+    "phaser": "^3.88.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
   }
 }

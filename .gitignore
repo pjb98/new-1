@@ -1,6 +1,4 @@
-node_modules/
-dist/
-*.local
-.DS_Store
-.vite/
-.claude/
+node_modules
+dist
+.env
+.env.local
